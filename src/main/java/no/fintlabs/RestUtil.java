@@ -1,19 +1,56 @@
 package no.fintlabs;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.fint.model.resource.utdanning.elev.ElevforholdResource;
+import no.fint.model.resource.utdanning.elev.ElevforholdResources;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-@Configuration
+@Slf4j
+@RequiredArgsConstructor
+@Service
 public class RestUtil {
 
-    @Value("${base.url:https://play-with-fint.felleskomponent.no/utdanning/vurdering}")
-    private String baseUrl;
+    private final WebClient webClient;
 
-    @Bean
-    public WebClient webClient() {
-        return WebClient.create(baseUrl);
+    public Flux<ElevforholdResource> getElevforholdResource() {
+        log.info("About to fetch Mono of ElevforholdResources...");
+
+        Flux<ElevforholdResource> elevforholdResources = webClient.get()
+                .uri("/elevforhold")
+                .retrieve()
+                .bodyToMono(ElevforholdResources.class)
+                .flatMapMany(resource -> Flux.fromIterable(resource.getContent()))
+                .doOnNext(resource -> log.info("Resource recieved: {}", resource.toString()));
+
+        log.info("This is being logged after the request...");
+        return elevforholdResources;
+    }
+
+    public Mono<ElevforholdResources> getElevforholdResources() {
+        log.info("About to fetch Mono of ElevforholdResources...");
+
+        Mono<ElevforholdResources> elevforholdResources = webClient.get()
+                .uri("/elevforhold")
+                .retrieve()
+                .bodyToMono(ElevforholdResources.class)
+                .doOnNext(fravar -> {
+                    log.info("Resource recieved: {}", fravar.toString());
+                });
+
+        log.info("This is being logged after the request...");
+        return elevforholdResources;
+    }
+
+    public Mono<String> getUsername() {
+        return Mono.just("henrik123");
+    }
+
+    public Mono<String> getPassword() {
+        return Mono.just("secret123");
     }
 
 }
