@@ -1,1 +1,9 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
+
 server.port: 8085
+base.url: https://play-with-fint.felleskomponent.no/utdanning/vurdering
